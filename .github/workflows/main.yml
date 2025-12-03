@@ -20,7 +20,7 @@ jobs:
       - name: Create ZIP package
         run: |
           mkdir -p package
-          cp -r target/classes package/
+          cp -r TestAutomation package/
           cd package
           zip -r java-build.zip .
 
