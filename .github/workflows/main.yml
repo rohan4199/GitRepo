@@ -28,4 +28,4 @@ jobs:
         run: |
           curl -u "${{ secrets.ARTIFACTORY_USER }}:${{ secrets.ARTIFACTORY_PASSWORD }}" \
                -T "package/java-build.zip" \
-               "https://trialcyua3p.jfrog.io/ui/admin/repositories/local/java-build.zip"
+               "https://trialcyua3p.jfrog.io/artifactory/Customizations/java-build.zip"
