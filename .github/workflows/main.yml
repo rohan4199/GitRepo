@@ -31,6 +31,8 @@ jobs:
           REPO: Customizations
           TARGET_NAME: java-build.zip
         run: |
-          curl -u "${{ secrets.ARTIFACTORY_USER }}:${{ secrets.ARTIFACTORY_PASSWORD }}" \
-               -T "package/java-build.zip" \
-               "https://trialcyua3p.jfrog.io/artifactory/Customizations/java-build.zip"
+          curl --fail --location --show-error --verbose \
+            -H "Authorization: Bearer ${{ secrets.ARTIFACTORY_ACCESS_TOKEN }}" \
+            -T "package/java-build.zip" \
+            "${ARTIFACTORY_URL}/${REPO}/${TARGET_NAME}"
+
