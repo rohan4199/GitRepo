@@ -22,8 +22,7 @@ jobs:
           mkdir -p package
           cp -r TestAutomation package/
           cd package
-          zip -r java-build.zip .
-      
+          zip -r java-build.zip .      
       
 
       - name: Upload ZIP to Artifactory
