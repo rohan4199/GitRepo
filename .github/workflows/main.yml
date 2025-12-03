@@ -28,6 +28,6 @@ jobs:
 
       - name: Upload ZIP to Artifactory
         run: |
-          curl -u "${{"rohan.yadav@neudesic.com"}}:${{ Gvk15032008$$ }}" \
+          curl -u "${{ secrets.ARTIFACTORY_USER }}:${{ secrets.ARTIFACTORY_PASSWORD }}" \
                -T "package/java-build.zip" \
                "https://trialcyua3p.jfrog.io/ui/admin/repositories/local/java-build.zip"
