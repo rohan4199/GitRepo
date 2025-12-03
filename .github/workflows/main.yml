@@ -1,0 +1,33 @@
+name: Build and Upload to Artifactory
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          java-version: "17"
+          distribution: "temurin"
+
+      - name: Build with Maven
+        run: mvn -B clean compile
+
+      - name: Create ZIP package
+        run: |
+          mkdir -p package
+          cp -r target/classes package/
+          cd package
+          zip -r java-build.zip .
+
+      - name: Upload ZIP to Artifactory
+        run: |
+          curl -u "${{ rohan.yadav@neudesic.com }}:${{ Gvk15032008$$ }}" \
+               -T "package/java-build.zip" \
+               "https://trialcyua3p.jfrog.io/ui/admin/repositories/local/java-build.zip"
