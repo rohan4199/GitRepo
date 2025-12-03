@@ -23,8 +23,14 @@ jobs:
           cp -r TestAutomation package/
           cd package
           zip -r java-build.zip .
+      
+      
 
       - name: Upload ZIP to Artifactory
+        env:
+          ARTIFACTORY_URL: https://trialcyua3p.jfrog.io/artifactory
+          REPO: Customizations
+          TARGET_NAME: java-build.zip
         run: |
           curl -u "${{ secrets.ARTIFACTORY_USER }}:${{ secrets.ARTIFACTORY_PASSWORD }}" \
                -T "package/java-build.zip" \
