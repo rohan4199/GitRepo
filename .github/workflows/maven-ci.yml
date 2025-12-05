@@ -1,4 +1,4 @@
-  
+
 name: Maven CI
 
 on:
@@ -7,15 +7,12 @@ on:
   pull_request:
     branches: [ "main" ]
 
-permissions:
-  contents: read
-
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout source
+      - name: Checkout
         uses: actions/checkout@v4
 
       - name: Set up Temurin JDK 17
@@ -24,28 +21,18 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
           cache: 'maven'
+          # 👉 Update to your actual module path(s)
+          cache-dependency-path: |
+            app/pom.xml
+            # or services/api/pom.xml
+            # or **/pom.xml  (only if you’re sure the glob matches)
 
-      - name: Build & test
-        run: mvn -B -U -e -ntp clean verify
+      - name: Build & test (module)
+        working-directory: app   # 👉 run mvn in the module folder
+        run: mvn -B -U -ntp clean verify
 
-      - name: Upload build artifact (JARs)
+      - name: Upload artifacts
         uses: actions/upload-artifact@v4
-        if: success()
         with:
-          name: maven-build-artifacts
-          path: |
-            **/target/*.jar
-            **/target/*.war
-            **/target/*.zip
-            !**/target/*-sources.jar
-            !**/target/*-javadoc.jar
-
-      - name: Upload test reports
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: test-reports
-          path: |
-            **/target/surefire-reports/**
-            **/target/failsafe-reports/**
-          retention-days: 7
+          name: app-artifacts
+          path: app/target/*.jar
