@@ -1,5 +1,5 @@
 
-name: Maven CI
+name: Java CI (Maven)
 
 on:
   push:
@@ -11,28 +11,31 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
+    strategy:
+      matrix:
+        java: [ '17' ]   # Add more versions if needed, e.g., '11', '21'
+
     steps:
-      - name: Checkout
+      - name: Checkout source
         uses: actions/checkout@v4
 
-      - name: Set up Temurin JDK 17
+      - name: Set up Java ${{ matrix.java }}
         uses: actions/setup-java@v4
         with:
-          distribution: 'temurin'
-          java-version: '17'
+          distribution: 'temurin'   # AdoptOpenJDK/Temurin
+          java-version: ${{ matrix.java }}
           cache: 'maven'
-          # 👉 Update to your actual module path(s)
-          cache-dependency-path: |
-            app/pom.xml
-            # or services/api/pom.xml
-            # or **/pom.xml  (only if you’re sure the glob matches)
 
-      - name: Build & test (module)
-        working-directory: app   # 👉 run mvn in the module folder
-        run: mvn -B -U -ntp clean verify
+      - name: Verify (clean + test)
+        run: mvn -B -ntp clean verify
 
-      - name: Upload artifacts
+      - name: Package
+        run: mvn -B -ntp package
+
+      - name: Upload JAR artifact
         uses: actions/upload-artifact@v4
         with:
-          name: app-artifacts
-          path: app/target/*.jar
+          name: app-jar
+          path: |
+            **/target/*.jar
+          if-no-files-found: error
