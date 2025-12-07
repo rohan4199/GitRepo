@@ -1,33 +1,45 @@
 
-name: Maven Build
+name: Maven CI/CD
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, develop ]
   pull_request:
 
 jobs:
-  build:
+  build-test-deploy:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set up Java (Temurin JDK 17)
+      - name: Setup JDK 17 with Maven cache + server creds
         uses: actions/setup-java@v4
         with:
-            distribution: 'temurin'
-            java-version: '17'
+          distribution: 'temurin'
+          java-version: '17'
+          cache: 'maven'
+          server-id: ${{ secrets.MAVEN_SERVER_ID }}
+          server-username: ${{ secrets.MAVEN_USERNAME }}
+          server-password: ${{ secrets.MAVEN_PASSWORD }}
 
-      - name: Cache Maven repository
-        uses: actions/cache@v4
-        with:
-          path: ~/.m2/repository
-          key: maven-${{ runner.os }}-${{ hashFiles('**/pom.xml') }}
-          restore-keys: |
-            maven-${{ runner.os }}-
-
-      - name: Build with Maven
+      - name: Build & test
         run: mvn -B -ntp -U clean verify
-        # -B: batch mode; -ntp: no transfer progress; -U: update snapshots
+
+      - name: Upload test reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: surefire-reports
+          path: '**/target/surefire-reports/*'
+
+      - name: Upload JARs
+        uses: actions/upload-artifact@v4
+        with:
+          name: jars
+          path: '**/target/*.jar'
+
+      - name: Deploy (only on main)
+        if: github.ref == 'refs/heads/main'
+        run: mvn -B -ntp -U -DskipTests deploy
