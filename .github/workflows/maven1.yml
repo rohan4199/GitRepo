@@ -1,5 +1,5 @@
 
-name: Maven Build (SWSPAttachmentStorage)
+name: Maven Build (custom build path)
 
 on:
   push:
@@ -9,25 +9,40 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      MAVEN_OPTS: "-Dfile.encoding=UTF-8"
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set up Temurin JDK 17
+      - name: Setup Temurin JDK 17 + Maven cache
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '17'
           cache: 'maven'
 
+      # Regular build (uses your pom.xml which points output to build/)
       - name: Build
         run: mvn -B -ntp -U clean package
 
-      - name: Upload JAR and class
+      # Upload compiled classes and JAR from the new path
+      - name: Upload classes & JAR
         uses: actions/upload-artifact@v4
         with:
-          name: built-outputs
+          name: build-outputs
           path: |
-            target/*.jar
-            target/classes/com/sw/sharepoint/doclinks/SWSPAttachmentStorage.class
+            build/*.jar
+            build/classes/**
+            build/test-classes/**
+
+      # Optional: Upload Surefire test reports if you use default report dirs
+      - name: Upload test reports (Surefire)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: surefire-reports
+          path: |
+            build/surefire-reports/**
+            build/failsafe-reports/**
