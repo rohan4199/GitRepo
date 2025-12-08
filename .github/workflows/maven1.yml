@@ -1,48 +1,76 @@
 
-name: Maven Build (custom build path)
+# File: .github/workflows/build-java.yml
+name: Build Java (Maven)
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, master ]
   pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    env:
-      MAVEN_OPTS: "-Dfile.encoding=UTF-8"
-
+    strategy:
+      matrix:
+        java: [ '17', '21' ]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Temurin JDK 17 + Maven cache
+      - name: Set up JDK ${{ matrix.java }}
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
-          java-version: '17'
+          java-version: ${{ matrix.java }}
           cache: 'maven'
 
-      # Regular build (uses your pom.xml which points output to build/)
-      - name: Build
-        run: mvn -B -ntp -U clean package
+      # Optional: configure Maven settings (for private repos like GitHub/JFrog)
+      # - name: Configure Maven settings
+      #   uses: s4u/maven-settings-action@v3
+      #   with:
+      #     servers: |
+      #       [{"id":"github","username":"${{ github.actor }}","password":"${{ secrets.GITHUB_TOKEN }}"}]
 
-      # Upload compiled classes and JAR from the new path
-      - name: Upload classes & JAR
+      - name: Build with Maven
+        run: |
+          mvn -version
+          mvn -B -ntp clean verify
+
+      - name: Archive build artifacts
+        if: success()
         uses: actions/upload-artifact@v4
         with:
-          name: build-outputs
+          name: maven-target-${{ matrix.java }}
           path: |
-            build/*.jar
-            build/classes/**
-            build/test-classes/**
+            **/target/*.jar
+            **/target/classes/**
+            **/target/site/**
 
-      # Optional: Upload Surefire test reports if you use default report dirs
-      - name: Upload test reports (Surefire)
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: surefire-reports
-          path: |
-            build/surefire-reports/**
-            build/failsafe-reports/**
+      # Example: publish to GitHub Packages (requires distributionManagement in pom.xml)
+      # - name: Publish to GitHub Packages
+      #   if: github.ref == 'refs/heads/main'
+      #   run: mvn -B -ntp deploy -DskipTests
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # --- Alternative Gradle job (enable if you use Gradle) ---
+  # gradle-build:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - uses: actions/setup-java@v4
+  #       with:
+  #         distribution: 'temurin'
+  #         java-version: '21'
+  #         cache: 'gradle'
+  #     - name: Grant execute permission for gradlew
+  #       run: chmod +x gradlew
+  #     - name: Build with Gradle
+  #       run: ./gradlew clean build --no-daemon
+  #     - name: Upload artifacts
+  #       uses: actions/upload-artifact@v4
+  #       with:
+  #         name: gradle-build
+  #         path: build/libs/*.jar
