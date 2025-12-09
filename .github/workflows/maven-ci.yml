@@ -1,29 +1,29 @@
 
-name: Build Maximo SMP (Maven)
+name: Build Java from Applications folder
 
 on:
-  push: 
+  push:
     branches: [ main, master ]
     paths:
-      - 'applications/**'      
+      - 'applications/**'
+      - 'pom.xml'
+      - '.github/workflows/maven-ci.yml'
   pull_request:
     branches: [ main, master ]
     paths:
       - 'applications/**'
+      - 'pom.xml'
   workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: applications  # ensures mvn runs inside SMP
 
     env:
-      JAVA_VERSION: '17' # change to 11 if required
+      JAVA_VERSION: '8'  # change to '11' if needed
 
     steps:
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v4
 
       - name: Set up JDK
@@ -38,11 +38,10 @@ jobs:
           mvn -v
           mvn -DskipTests clean package
 
-      - name: Upload Maven artifacts
+      - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: maximo-smp-maven-artifacts
+          name: applications-build
           path: |
-            applications/target/**/*.jar
-            applications/**/target/**/*.jar
+            target/**/*.jar
           if-no-files-found: warn
