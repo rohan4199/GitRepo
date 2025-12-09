@@ -1,29 +1,98 @@
 
 <?xml version="1.0" encoding="UTF-8"?>
-<www.w3.org/2001/XMLSchema-instance"<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
-                             https://maven.apache.org/xsd/maven-4.0.0.xsd">
-
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <!-- ==== Project coordinates: change to match your org/repo ==== -->
   <groupId>com.rohan.maximo</groupId>
   <artifactId>applications-build</artifactId>
   <version>1.0.0</version>
   <packaging>jar</packaging>
-  <name>Maximo Applications Java Build</name>
-  <description>Builds Java sources from the applications folder</description>
+  <name>Applications Java Build</name>
 
-  <!-- ==== Global properties ==== -->
   <properties>
-    <!-- Set your Java version: 1.8 or 11 -->
-    <maven.compiler.source>1.8</maven.compiler.source>
+    <maven.compiler.source>1.8</maven.compiler.source>  <!-- change to 11 if needed -->
     <maven.compiler.target>1.8</maven.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <maven.deploy.skip>true</maven.deploy.skip> <!-- keep CI simple: no deploy -->
+    <maven.deploy.skip>true</maven.deploy.skip>
   </properties>
 
-  <!-- ==== Dependencies ==== -->
   <dependencies>
-    <!-- Example: add any libraries you need here.
+    <!-- Add any required dependencies here -->
+    <!-- Example for local vendor jars (temporary quick fix):
+    <dependency>
+      <groupId>com.ibm.maximo</groupId>
+      <artifactId>maximo-core</artifactId>
+      <version>7.6</version>
+      <scope>system</scope>
+      <systemPath>${project.basedir}/lib/maximo-core.jar</systemPath>
+    </dependency>
+    -->
+  </dependencies>
 
+  <build>
+    <!-- Compile Java from the non-standard applications directory -->
+    <sourceDirectory>${project.basedir}/applications</sourceDirectory>
+
+    <!-- Optionally include resources from applications -->
+    <resources>
+      <resource>
+        <directory>${project.basedir}/applications</directory>
+        <includes>
+          <include>**/*.properties</include>
+          <include>**/*.xml</include>
+          <include>**/*.json</include>
+        </includes>
+        <excludes>
+          <exclude>**/*.java</exclude>
+        </excludes>
+      </resource>
+    </resources>
+
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.11.0</version>
+        <configuration>
+          <source>${maven.compiler.source}</source>
+          <target>${maven.compiler.target}</target>
+          <encoding>${project.build.sourceEncoding}</encoding>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <version>3.3.0</version>
+        <configuration>
+          <archive>
+            <manifest>
+              <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+            </manifest>
+          </archive>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>3.2.5</version>
+        <configuration>
+          <skipTests>true</skipTests>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+  <profiles>
+    <profile>
+      <id>java11</id>
+      <properties>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
+      </properties>
+    </profile>
+  </profiles>
+</project>
