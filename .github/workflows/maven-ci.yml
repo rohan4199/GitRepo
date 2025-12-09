@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: SMP  # ensures mvn runs inside SMP
+        working-directory: applications  # ensures mvn runs inside SMP
 
     env:
       JAVA_VERSION: '8' # change to 11 if required
@@ -44,6 +44,6 @@ jobs:
         with:
           name: maximo-smp-maven-artifacts
           path: |
-            SMP/target/**/*.jar
-            SMP/**/target/**/*.jar
+            applications/target/**/*.jar
+            applications/**/target/**/*.jar
           if-no-files-found: warn
