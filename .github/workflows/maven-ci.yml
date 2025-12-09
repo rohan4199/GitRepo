@@ -5,8 +5,7 @@ on:
   push: 
     branches: [ main, master ]
     paths:
-      - 'applications/**'
-      - '.github/workflows/maven-ci.yml'
+      - 'applications/**'      
   pull_request:
     branches: [ main, master ]
     paths:
@@ -21,7 +20,7 @@ jobs:
         working-directory: applications  # ensures mvn runs inside SMP
 
     env:
-      JAVA_VERSION: '8' # change to 11 if required
+      JAVA_VERSION: '17' # change to 11 if required
 
     steps:
       - name: Checkout repository
