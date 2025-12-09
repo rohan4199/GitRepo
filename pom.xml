@@ -1,75 +1,29 @@
 
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<?xml version="1.0" encoding="UTF-8"?>
+<www.w3.org/2001/XMLSchema-instance"<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+                             https://maven.apache.org/xsd/maven-4.0.0.xsd">
+
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>com.example</groupId>
-  <artifactId>app</artifactId>
-  <version>1.0.0-SNAPSHOT</version>
-  <name>Example App</name>
-  <description>Minimal Maven Java project</description>
+  <!-- ==== Project coordinates: change to match your org/repo ==== -->
+  <groupId>com.rohan.maximo</groupId>
+  <artifactId>applications-build</artifactId>
+  <version>1.0.0</version>
+  <packaging>jar</packaging>
+  <name>Maximo Applications Java Build</name>
+  <description>Builds Java sources from the applications folder</description>
 
+  <!-- ==== Global properties ==== -->
   <properties>
-    <maven.compiler.source>17</maven.compiler.source>
-    <maven.compiler.target>17</maven.compiler.target>
+    <!-- Set your Java version: 1.8 or 11 -->
+    <maven.compiler.source>1.8</maven.compiler.source>
+    <maven.compiler.target>1.8</maven.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <junit.version>5.10.2</junit.version>
+    <maven.deploy.skip>true</maven.deploy.skip> <!-- keep CI simple: no deploy -->
   </properties>
 
+  <!-- ==== Dependencies ==== -->
   <dependencies>
-    <dependency>
-      <groupId>org.junit.jupiter</groupId>
-      <artifactId>junit-jupiter</artifactId>
-      <version>${junit.version}</version>
-      <scope>test</scope>
-    </dependency>
-  </dependencies>
-  
-   
-  
-  <build>
-    <!-- Make Maven compile sources from the applications directory -->
-    <sourceDirectory>${project.basedir}/applications</sourceDirectory>
+    <!-- Example: add any libraries you need here.
 
-    <plugins>
-      <!-- Java compiler settings -->
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.11.0</version>
-        <configuration>
-          <source>1.8</source>  <!-- change to 11 if you need Java 11 -->
-          <target>1.8</target>
-        </configuration>
-      </plugin>
-
-      <!-- JAR packaging (optional if you already have it) -->
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-jar-plugin</artifactId>
-        <version>3.3.0</version>
-        <configuration>
-          <archive>
-            <manifest>
-              <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
-            </manifest>
-          </archive>
-        </configuration>
-      </plugin>
-    </plugins>
-  </build>
-
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-surefire-plugin</artifactId>
-        <version>3.5.1</version>
-        <configuration>
-          <useModulePath>false</useModulePath>
-        </configuration>
-      </plugin>
-    </plugins>
-  </build>
-</project>
