@@ -1,76 +1,78 @@
 
-# File: .github/workflows/build-java.yml
-name: Build Java (Maven)
+name: Build Maximo SMP Java
 
 on:
   push:
     branches: [ main, master ]
+    paths:
+      - 'SMP/**'
+      - '.github/workflows/maximo-smp-build.yml'
   pull_request:
     branches: [ main, master ]
+    paths:
+      run: |      - 'SMP/**'
+          test -f "${ANT_BUILD_FILE}" || (echo "Ant build file not found at ${ANT_BUILD_FILE}" && exit 1)
+
+      # If your build needs environment variables (e.g., WebSphere paths, Maximo home),
+      # load them from secrets and pass to ant:
+      - name: Prepare environment (optional)
+        if: ${{ secrets.MAXIMO_HOME != '' }}
+        run: |
+          echo "Using MAXIMO_HOME from secrets"
+        env:
+          MAXIMO_HOME: ${{ secrets.MAXIMO_HOME }}
+
+      - name: Run Ant build
+        run: |
+          # Pass any required properties: -Dmaximo.home="${MAXIMO_HOME}" etc.
+          ant -f "${ANT_BUILD_FILE}" "${ANT_TARGET}"
+
+      - name: List build outputs
+        run: |
+          echo "Listing build outputs under ${OUTPUT_DIR}"
+          ls -la "${OUTPUT_DIR}" || true
+
+      - name: Upload build artifacts (EAR/JAR)
+        uses: actions/upload-artifact@v4
+        with:
+          name: maximo-smp-artifacts
+          path: |
+            ${OUTPUT_DIR}/**/*.ear
+            ${OUTPUT_DIR}/**/*.jar
+          if-no-files-found: warn
   workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        java: [ '17', '21' ]
+
+    env:
+      # Adjust to 11 if your Maximo version requires it
+      JAVA_VERSION: '8'
+      # Update these paths if your build produces artifacts elsewhere
+      ANT_BUILD_FILE: 'SMP/maximo/deployment/build.xml'
+      ANT_TARGET: 'all' # common targets: all, buildmaximoear, build
+      OUTPUT_DIR: 'SMP/maximo/deployment/default/build'
+
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up JDK ${{ matrix.java }}
+      - name: Set up JDK
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
-          java-version: ${{ matrix.java }}
-          cache: 'maven'
+          java-version: ${{ env.JAVA_VERSION }}
+          cache: 'gradle' # harmless even if you don't use Gradle
 
-      # Optional: configure Maven settings (for private repos like GitHub/JFrog)
-      # - name: Configure Maven settings
-      #   uses: s4u/maven-settings-action@v3
-      #   with:
-      #     servers: |
-      #       [{"id":"github","username":"${{ github.actor }}","password":"${{ secrets.GITHUB_TOKEN }}"}]
-
-      - name: Build with Maven
+      - name: Install Ant
         run: |
-          mvn -version
-          mvn -B -ntp clean verify
+          sudo apt-get update
+          sudo apt-get install -y ant
 
-      - name: Archive build artifacts
-        if: success()
-        uses: actions/upload-artifact@v4
-        with:
-          name: maven-target-${{ matrix.java }}
-          path: |
-            **/target/*.jar
-            **/target/classes/**
-            **/target/site/**
+      - name: Show Java & Ant versions
+        run: |
+          java -version
+          ant -version
 
-      # Example: publish to GitHub Packages (requires distributionManagement in pom.xml)
-      # - name: Publish to GitHub Packages
-      #   if: github.ref == 'refs/heads/main'
-      #   run: mvn -B -ntp deploy -DskipTests
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-  # --- Alternative Gradle job (enable if you use Gradle) ---
-  # gradle-build:
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #     - uses: actions/setup-java@v4
-  #       with:
-  #         distribution: 'temurin'
-  #         java-version: '21'
-  #         cache: 'gradle'
-  #     - name: Grant execute permission for gradlew
-  #       run: chmod +x gradlew
-  #     - name: Build with Gradle
-  #       run: ./gradlew clean build --no-daemon
-  #     - name: Upload artifacts
-  #       uses: actions/upload-artifact@v4
-  #       with:
-  #         name: gradle-build
-  #         path: build/libs/*.jar
+      - name: Validate Ant build file exists
