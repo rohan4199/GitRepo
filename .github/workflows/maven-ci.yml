@@ -2,7 +2,7 @@
 name: Build Maximo SMP (Maven)
 
 on:
-  push:
+  push: 
     branches: [ main, master ]
     paths:
       - 'applications/**'
