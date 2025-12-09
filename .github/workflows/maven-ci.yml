@@ -10,7 +10,7 @@ on:
   pull_request:
     branches: [ main, master ]
     paths:
-      - 'SMP/**'
+      - 'applications/**'
   workflow_dispatch:
 
 jobs:
