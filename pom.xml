@@ -1,6 +1,8 @@
 
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-         <modelVersion>4.0.0</modelVersion>         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.example</groupId>
     <artifactId>basic-maven-project</artifactId>
@@ -16,7 +18,6 @@
     </properties>
 
     <dependencies>
-        <!-- Example: JUnit for testing -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
@@ -27,18 +28,15 @@
 
     <build>
         <plugins>
-            <!-- Compiler Plugin -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.11.0</version>
-                <configuration>
+               configuration>
                     <source>${maven.compiler.source}</source>
                     <target>${maven.compiler.target}</target>
                 </configuration>
             </plugin>
 
-            <!-- Surefire Plugin for running tests -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
@@ -47,4 +45,3 @@
         </plugins>
     </build>
 </project>
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
