@@ -3,7 +3,7 @@ name: Build Java from Applications folder
 
 on:
   push:
-    branches: [ main, master ]
+    branches: [ main, master ] 
     paths:
       - 'applications/**'
       - 'pom.xml'
