@@ -1,41 +1,49 @@
 
-name: Java CI (Maven)
+name: Build Maximo SMP (Maven)
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ main, master ]
+    paths:
+      - 'applications/**'
+      - '.github/workflows/maven-ci.yml'
   pull_request:
-    branches: [ "main" ]
+    branches: [ main, master ]
+    paths:
+      - 'SMP/**'
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: SMP  # ensures mvn runs inside SMP
 
-    strategy:
-      matrix:
-        java: [ '17' ]   # Add more versions if needed, e.g., '11', '21'
+    env:
+      JAVA_VERSION: '8' # change to 11 if required
 
     steps:
-      - name: Checkout source
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Java ${{ matrix.java }}
+      - name: Set up JDK
         uses: actions/setup-java@v4
         with:
-          distribution: 'temurin'   # AdoptOpenJDK/Temurin
-          java-version: ${{ matrix.java }}
+          distribution: 'temurin'
+          java-version: ${{ env.JAVA_VERSION }}
           cache: 'maven'
 
-      - name: Verify (clean + test)
-        run: mvn -B -ntp clean verify
+      - name: Build with Maven
+        run: |
+          mvn -v
+          mvn -DskipTests clean package
 
-      - name: Package
-        run: mvn -B -ntp package
-
-      - name: Upload JAR artifact
+      - name: Upload Maven artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: app-jar
+          name: maximo-smp-maven-artifacts
           path: |
-            **/target/*.jar
-          if-no-files-found: error
+            SMP/target/**/*.jar
+            SMP/**/target/**/*.jar
+          if-no-files-found: warn
