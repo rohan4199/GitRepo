@@ -1,47 +1,168 @@
 
+<?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+                             https://maven.apache.org/xsd/maven-4.0.0.xsd">
 
-    <groupId>com.example</groupId>
-    <artifactId>basic-maven-project</artifactId>
-    <version>1.0.0</version>
-    <packaging>jar</packaging>
+  <!-- ==== Project Coordinates (change to your org/app) ==== -->
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>com.example</groupId>
+  <artifactId>my-app</artifactId>
+  <version>1.0.0</version>
+  <packaging>jar</packaging>
+  <name>My App</name>
+  <description>Sample Java project built with Maven and GitHub Actions.</description>
+  <url>https://example.com/my-app</url>
 
-    <name>Basic Maven Project</name>
-    <description>A simple Maven project for Java build using GitHub Actions</description>
+  <!-- ==== Properties (centralized versions & encoding) ==== -->
+  <properties>
+    <!-- Java language level -->
+    <maven.compiler.source>17</maven.compiler.source>
+    <maven.compiler.target>17</maven.compiler.target>
 
-    <properties>
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
-    </properties>
+    <!-- Ensure consistent encoding -->
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-    <dependencies>
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter</artifactId>
-            <version>5.9.3</version>
-            <scope>test</scope>
-        </dependency>
-    </dependencies>
+    <!-- Plugin versions -->
+    <maven.compiler.plugin.version>3.11.0</maven.compiler.plugin.version>
+    <maven.surefire.plugin.version>3.5.0</maven.surefire.plugin.version>
+    <maven.resources.plugin.version>3.3.1</maven.resources.plugin.version>
+    <maven.jar.plugin.version>3.4.1</maven.jar.plugin.version>
 
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-               configuration>
-                    <source>${maven.compiler.source}</source>
-                    <target>${maven.compiler.target}</target>
-                </configuration>
-            </plugin>
+    <!-- Dependency versions -->
+    <junit.jupiter.version>5.10.2</junit.jupiter.version>
+    <servlet.api.version>4.0.1</servlet.api.version>
+  </properties>
 
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>3.0.0-M9</version>
-            </plugin>
-        </plugins>
-    </build>
+  <!-- ==== Dependencies ==== -->
+  <dependencies>
+    <!-- JUnit 5 for tests -->
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <version>${junit.jupiter.version}</version>
+      <scope>test</scope>
+    </dependency>
+
+    <!-- Optional: Servlet API (if you have servlet-based code).
+         Scope 'provided' means it's available at runtime by the container (e.g., Tomcat),
+         but not bundled into your JAR. Remove if not needed. -->
+    <dependency>
+      <groupId>javax.servlet</groupId>
+      <artifactId>javax.servlet-api</artifactId>
+      <version>${servlet.api.version}</version>
+      <scope>provided</scope>
+    </dependency>
+  </dependencies>
+
+  <!-- ==== Build & Plugins ==== -->
+  <build>
+    <!-- Name of the generated artifact (target/my-app-1.0.0.jar) -->
+    <finalName>${project.artifactId}-${project.version}</finalName>
+
+    <plugins>
+      <!-- Compiler plugin: Java version + encoding -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>${maven.compiler.plugin.version}</version>
+        <configuration>
+          <source>${maven.compiler.source}</source>
+          <target>${maven.compiler.target}</target>
+          <encoding>${project.build.sourceEncoding}</encoding>
+          <!-- Optional: fail on warnings -->
+          <!-- <compilerArgs>
+            <arg>-Xlint:all</arg>
+          </compilerArgs> -->
+        </configuration>
+      </plugin>
+
+      <!-- Resources plugin: ensure UTF-8 when copying resources -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-resources-plugin</artifactId>
+        <version>${maven.resources.plugin.version}</version>
+        <configuration>
+          <encoding>${project.build.sourceEncoding}</encoding>
+          <!-- If you need filtering (replace ${...} in resource files),
+               set filtering to true and configure includes -->
+          <useDefaultDelimiters>true</useDefaultDelimiters>
+        </configuration>
+      </plugin>
+
+      <!-- Surefire plugin: JUnit 5 tests -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>${maven.surefire.plugin.version}</version>
+        <configuration>
+          <useModulePath>false</useModulePath>
+          <includes>
+            <include>**/*Test.java</include>
+            <include>**/*Tests.java</include>
+            <include>**/*IT.java</include>
+          </includes>
+          <!-- If you pass complex args/props, use CDATA to keep XML valid:
+          <systemPropertyVariables>
+            <exampleProp><![CDATA[value with & and < signs]]></exampleProp>
+          </systemPropertyVariables>
+          -->
+        </configuration>
+      </plugin>
+
+      <!-- Jar plugin: default JAR manifest; add Main-Class if you have a runnable app -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <version>${maven.jar.plugin.version}</version>
+        <configuration>
+          <archive>
+            <manifest>
+              <!-- Uncomment and set your main class if you want 'java -jar' runnable JAR -->
+              <!-- <mainClass>com.example.app.Main</mainClass> -->
+            </manifest>
+          </archive>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+  <!-- ==== Optional: distributionManagement/repositories ====
+       Configure if you deploy to JFrog or a private repo.
+       Keep this commented unless needed to avoid CI issues. -->
+  <!--
+  <distributionManagement>
+    <repository>
+      <id>internal-releases</id>
+      <url>https://your-jfrog/artifactory/libs-release-local</url>
+    </repository>
+    <snapshotRepository>
+      <id>internal-snapshots</id>
+      <url>https://your-jfrog/artifactory/libs-snapshot-local</url>
+    </snapshotRepository>
+  </distributionManagement>
+  -->
+
+  <!-- ==== Developers/SCM (optional) ==== -->
+  <!--
+  <developers>
+    <developer>
+      <id>rohan.yadav</id>
+      <name>Rohan Yadav</name>
+      <organization>Automagin Solutions Pvt Ltd</organization>
+      <roles>
+        <role>developer</role>
+      </roles>
+    </developer>
+  </developers>
+
+  <scm>
+    <connection>scm:git:https://github.com/your-org/your-repo.git</connection>
+    <developerConnection>scm:git:ssh://git@github.com/your-org/your-repo.git</developerConnection>
+    <url>https://github.com/your-org/your-repo</url>
+    <tag>HEAD</tag>
+  </scm>
+  -->
 </project>
